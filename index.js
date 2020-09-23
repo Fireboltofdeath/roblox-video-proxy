@@ -23,7 +23,7 @@ app.get("/asset/:id/cdn", (req, res) => {
 app.get("/asset/:id", (req, res) => {
 	getCdnUrl(req.params.id)
 		.then(url => {
-			request(url, {encoding: null}, (err, _, body) => {
+			request.get(url, {encoding: null}, (err, _, body) => {
 				if (err) return res.status(500).send();
 				zlib.gunzip(body, (err, dezip) => {
 					if (err) return res.status(500).send();
