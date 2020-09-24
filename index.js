@@ -25,12 +25,16 @@ function getDecompressedVideo(id) {
 	return new Promise((resolve, reject) => {
 		getCdnUrl(id)
 			.then(url => {
-				request.get(url, {encoding: null}, (err, _, body) => {
+				request.get(url, {encoding: null}, (err, resp, body) => {
 					if (err) return reject("failed to get video");
-					zlib.gunzip(body, (err, dezip) => {
-						if (err) return reject("gunzip failed");
-						resolve(dezip);
-					});
+					if (resp.headers["content-encoding"] == "gzip") {
+						zlib.gunzip(body, (err, dezip) => {
+							if (err) return reject("gunzip failed");
+							resolve(dezip);
+						});
+					} else {
+						resolve(body);
+					}
 				});
 			})
 			.catch(() => reject("failed to get cdn url"));
