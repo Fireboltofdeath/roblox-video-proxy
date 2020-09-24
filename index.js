@@ -74,6 +74,12 @@ app.get("/asset/:id/format/:format", (req,res) => {
 							res.status(500).send("Encoding failed");
 							fs.unlink(`./temp/${fileName}.webm`);
 						})
+						.on("begin", () => {
+							console.log(`Began encoding video-${req.params.id}.webm to video-${req.params.id}.mp4`);
+						})
+						.on("progress", progress => {
+							console.log(`Progress [${req.params.id}]: ${progress.percentComplete}`)
+						})
 						.on("end", () => {
 							res.set("Content-Disposition", `attachment; filename=video-${req.params.id}.${req.params.format}`)
 							res.sendFile(__dirname + `/temp/${fileName}.mp4`, err => {
