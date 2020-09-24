@@ -6,8 +6,8 @@ const hbjs = require('handbrake-js')
 
 const http = require("https");
 
-if (!fs.existsSync("temp")) {
-	fs.mkdirSync("temp")
+if (!fs.existsSync(`${__dirname}/temp`)) {
+	fs.mkdirSync(`${__dirname}/temp`)
 }
 
 app.use(require("cors")());
@@ -67,12 +67,12 @@ app.get("/asset/:id/format/:format", (req,res) => {
 					return res.send(video);
 				}
 				let fileName = Buffer.from(`${req.connection.remoteAddress}-${req.params.id}-${Math.floor(Math.random() * 100000000)}`).toString("base64");
-				fs.writeFile(`./temp/${fileName}.webm`, video, err => {
+				fs.writeFile(`${__dirname}/temp/${fileName}.webm`, video, err => {
 					if (err) return res.status(500).send("failed to write video");
-					hbjs.spawn({ input: `./temp/${fileName}.webm`, output: `./temp/${fileName}.mp4` })
+					hbjs.spawn({ input: `${__dirname}/temp/${fileName}.webm`, output: `${__dirname}/temp/${fileName}.mp4` })
 						.on("error", () => {
 							res.status(500).send("Encoding failed");
-							fs.unlink(`./temp/${fileName}.webm`);
+							fs.unlink(`${__dirname}/temp/${fileName}.webm`);
 						})
 						.on("begin", () => {
 							console.log(`Began encoding video-${req.params.id}.webm to video-${req.params.id}.mp4`);
@@ -84,8 +84,8 @@ app.get("/asset/:id/format/:format", (req,res) => {
 							res.set("Content-Disposition", `attachment; filename=video-${req.params.id}.${req.params.format}`)
 							res.sendFile(__dirname + `/temp/${fileName}.mp4`, err => {
 								if (err) return (!res.headersSent) && res.status(500).send("sending file failed");
-								fs.unlink(`./temp/${fileName}.webm`, err => err && console.log(err));
-								fs.unlink(`./temp/${fileName}.mp4`, err => err && console.log(err));
+								fs.unlink(`${__dirname}/temp/${fileName}.webm`, err => err && console.log(err));
+								fs.unlink(`${__dirname}/temp/${fileName}.mp4`, err => err && console.log(err));
 							});
 						})
 				});
