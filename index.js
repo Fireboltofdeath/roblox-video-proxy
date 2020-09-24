@@ -17,23 +17,23 @@ function getCdnUrl(id) {
 app.get("/asset/:id/cdn", (req, res) => {
 	getCdnUrl(req.params.id)
 		.then(url => res.send(url))
-		.catch(() => res.status(500).send());
+		.catch(() => res.status(500).send("failed to get cdn url"));
 })
 
 app.get("/asset/:id", (req, res) => {
 	getCdnUrl(req.params.id)
 		.then(url => {
 			request.get(url, {encoding: null}, (err, _, body) => {
-				if (err) return res.status(500).send();
+				if (err) return res.status(500).send("failed to get video");
 				zlib.gunzip(body, (err, dezip) => {
-					if (err) return res.status(500).send();
+					if (err) return res.status(500).send("gunzip failed");
 					res.set('Content-Type', 'video/webm');
 					res.set("Content-Disposition", `attachment; filename=video-${req.params.id}.webm`)
 					res.send(dezip);
 				});
 			});
 		})
-		.catch(() => res.status(500).send());
+		.catch(() => res.status(500).send("failed to get cdn url"));
 });
 
 console.log(`Listening to port ${process.env.PORT}`);
